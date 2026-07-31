@@ -4,6 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 @AGENTS.md
 
+
+## Skills
+Usa siempre /frontend-desing para diseñar interfases de usuario
+
+
+
 ## Project
 
 Arcade Vault — plataforma para jugar online y competir por puntaje. El repositorio está
@@ -14,16 +20,6 @@ El flujo de trabajo esperado es **Spec Driven Design**: primero `/spec` para red
 especificación, luego `/spec-impl` para implementarla (skills de
 `Klerith/fernando-skills`, instaladas con `npx skills@latest add Klerith/fernando-skills`).
 Ante una petición de funcionalidad nueva, revisa si existe una spec antes de escribir código.
-
-## Commands
-
-```bash
-npm run dev     # servidor de desarrollo
-npm run build   # build de producción
-npm run start   # sirve el build
-npm run lint    # eslint (flat config)
-npx tsc --noEmit  # chequeo de tipos; no hay script propio
-```
 
 No hay framework de tests configurado. Si se añade uno, documenta aquí cómo correr un test
 individual.
