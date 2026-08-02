@@ -36,6 +36,11 @@
 - Reglas reales de vidas, niveles y dificultad.
 - Tests automatizados. El repo no tiene framework de tests configurado.
 - Cambios en `app/globals.css`, salvo añadir clases que el template no cubra.
+  Durante la implementación no hizo falta ninguna: el CSS migrado cubre las seis
+  pantallas.
+- Cambios de configuración, salvo uno necesario: `eslint.config.mjs` ignora
+  `references/**`, porque esa maqueta usa React por CDN y rompía `npm run lint`
+  con 10 errores ajenos al código nuevo.
 
 Notas de alcance heredadas del template y conservadas a propósito:
 
@@ -140,8 +145,13 @@ Cada paso deja la aplicación compilando y navegable. Verificación manual con
 
 3. **Contexto de sesión.** Crear `lib/session.tsx` con `"use client"`, exportando
    `SessionProvider` y el hook `useSession` (`user`, `login`, `signOut`,
-   `saveScore`). El estado arranca en `null` y `av_user` se lee dentro de un
-   `useEffect` para no romper la hidratación.
+   `saveScore`). El primer render devuelve `null` y `av_user` solo se lee tras
+   montar en el cliente, para no romper la hidratación.
+   Se implementa con `useSyncExternalStore` (`getServerSnapshot` devuelve
+   `null`) y no leyendo dentro de un `useEffect`: la regla de lint
+   `react-hooks/set-state-in-effect` prohíbe el `setState` síncrono que esa
+   variante necesitaba. `getSnapshot` cachea sobre el string crudo para devolver
+   siempre la misma referencia mientras el dato no cambie.
    Verificación: la app sigue levantando; aún no hay UI que lo consuma.
 
 4. **Nav y pie de página.** Crear `components/Nav.tsx` (cliente: panel móvil,
@@ -156,11 +166,16 @@ Cada paso deja la aplicación compilando y navegable. Verificación manual con
    buscador, chips de categoría, grilla y el estado vacío «NO HAY RESULTADOS»).
    Reescribir `app/page.tsx` como componente de servidor: héroe estático más
    `<GameBrowser games={GAMES} />`.
-   Verificación: buscar «ca» deja solo CAÍDA; el chip PUZZLE filtra a un juego;
-   una búsqueda sin resultados muestra el mensaje; la tarjeta lleva a `/juegos/[id]`.
+   El filtro es por subcadena del título, como en el template: buscar «ca»
+   devuelve CAÍDA y ROCAS, no solo CAÍDA.
+   Verificación: buscar «ser» deja solo SERPENTINA; el chip PUZZLE filtra a un
+   juego; una búsqueda sin resultados muestra el mensaje; la tarjeta lleva a
+   `/juegos/[id]`.
 
 6. **Tabla de puntuaciones.** Crear `components/Leaderboard.tsx` (servidor):
    recibe `ScoreRow[]` y pinta la lista con los estilos `top1`, `top2` y `top3`.
+   Lo consume solo el Detalle: el Salón usa otro markup (`hall-table`, con
+   cabecera y animación escalonada por fila) y no comparte este componente.
    Verificación: se renderiza aislado sin errores de consola.
 
 7. **Detalle del juego.** Crear `app/juegos/[id]/page.tsx` como componente de
@@ -173,11 +188,19 @@ Cada paso deja la aplicación compilando y navegable. Verificación manual con
 8. **Pantalla 404.** Crear `app/not-found.tsx` con estética arcade
    («GAME OVER · 404») y un enlace de vuelta a `/`.
    Verificación: `/juegos/no-existe` muestra esa pantalla con el Nav visible.
+   El Nav no viene en el HTML inicial de esta ruta: `usePathname()` no puede
+   prerenderizarse en `/_not-found`, así que ese subárbol se monta al hidratar.
+   En el navegador la barra se ve; en un `curl`, no.
 
 9. **Reproductor.** Crear `app/juegos/[id]/jugar/page.tsx` (servidor, resuelve
-   el juego igual que el paso 7) y `components/GamePlayer.tsx` (cliente): HUD,
+   el juego igual que el paso 7, con su propio `generateStaticParams` y
+   `generateMetadata`) y `components/GamePlayer.tsx` (cliente): HUD,
    marco CRT con la arena decorativa, pausa, y modal de fin con guardado vía
    `saveScore`. El intervalo se limpia en el `return` del `useEffect`.
+   El nivel se **deriva** del puntaje (`Math.floor(score / 2500) + 1`), no se
+   guarda en estado: el `score % 2500 < 100` del template depende del tamaño del
+   salto aleatorio y cuenta subidas de más. Las vidas son la constante
+   `LIVES = 3`, porque nada las decrementa.
    Verificación: el puntaje sube solo; PAUSA lo congela y muestra el overlay;
    FIN abre el modal; guardar escribe en `av_scores`; JUGAR DE NUEVO reinicia a 0.
 
@@ -193,9 +216,11 @@ Cada paso deja la aplicación compilando y navegable. Verificación manual con
     Verificación: cambiar de pestaña cambia el ranking; sin sesión la fila
     amarilla no aparece.
 
-El paso 6 va antes que el 7 porque `Leaderboard` lo consumen tanto el Detalle
-como el Salón. Los botones de navegación pasan a ser `Link` con la clase `btn`:
-mismo aspecto, pero accesibles por teclado y abribles en pestaña nueva.
+El paso 6 va antes que el 7 porque el Detalle consume `Leaderboard`. Los botones
+de navegación pasan a ser `Link` con la clase `btn`: mismo aspecto, pero
+accesibles por teclado y abribles en pestaña nueva. En la tarjeta de juego, el
+botón JUGAR es un `<span className="btn">`, ya que la tarjeta entera es el enlace
+y un `<button>` dentro de un `<a>` sería HTML inválido.
 
 ## Criterios de aceptación
 
@@ -307,7 +332,14 @@ mismo aspecto, pero accesibles por teclado y abribles en pestaña nueva.
   tablas en el servidor sin desajustes de hidratación.
 - **Sí:** semilla derivada de la suma de códigos de carácter del `id`. Con el
   `id.length` del template, tres pares de juegos mostraban rankings idénticos.
-- **Sí:** sesión en `localStorage` más contexto de React, leída en `useEffect`.
+- **Sí:** sesión en `localStorage` más contexto de React, leída tras montar.
+- **No:** leerla con `setState` dentro de un `useEffect`, como decía el plan
+  original. El lint del proyecto lo prohíbe y el criterio de aceptación exige
+  `npm run lint` limpio. Se usa `useSyncExternalStore`, que además sincroniza la
+  sesión entre pestañas mediante el evento `storage`.
+- **Sí:** derivar valores en render en lugar de sincronizarlos con efectos.
+  Aplica al nivel del reproductor y al nombre del modal de fin, que combina lo
+  editado con la sesión sin necesidad de un efecto.
 - **No:** cookies con Server Actions. Es infraestructura de autenticación real
   para un MVP que no autentica a nadie.
 - **No:** versionar el esquema de `localStorage`. Son datos desechables; si el
@@ -345,6 +377,8 @@ mismo aspecto, pero accesibles por teclado y abribles en pestaña nueva.
 | Alguna clase CSS del template no quedó migrada a `app/globals.css` y una pantalla se ve rota. | Cotejar contra `references/templates/styles.css` al cerrar cada paso; si falta algo, se añade a `globals.css` dentro del bloque del tema. |
 | Convertir botones en `Link` cambia el aspecto por estilos de `a` heredados. | Se conserva la clase `btn`; revisar visualmente Detalle y Salón contra el template abierto en paralelo. |
 | Escribir contra la API de Next.js memorizada en vez de la instalada (16.2.12). | Consultar `node_modules/next/dist/docs/01-app/` antes de tocar routing, `params` o metadata, como exige AGENTS.md. |
+| `PageProps<"/ruta">` falla con `does not satisfy the constraint '"/"'` al crear una ruta nueva. | Los tipos de ruta se generan en el build: ejecutar `npm run build` una vez y el error desaparece. |
+| La caché de `getSnapshot` en `lib/session.tsx` devuelve una referencia nueva por render y React entra en bucle. | La comparación es sobre el string crudo de `localStorage`, no sobre el objeto parseado. Cualquier cambio ahí debe mantener esa invariante. |
 
 ## Lo que **no** entra en esta spec
 
