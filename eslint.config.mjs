@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Maqueta original en JSX suelto: es material de referencia, no fuente
+    // del proyecto (usa globales de React vía CDN y no se compila).
+    "references/**",
   ]),
 ]);
 

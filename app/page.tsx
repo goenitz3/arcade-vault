@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <main className="av-main">
+    <>
       <section className="av-hero">
         <h1>Arcade Vault</h1>
         <div className="sub">
@@ -75,6 +75,6 @@ export default function Home() {
           </div>
         </article>
       </div>
-    </main>
+    </>
   );
 }
