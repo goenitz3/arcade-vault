@@ -1,0 +1,17 @@
+import GameBrowser from "@/components/GameBrowser";
+import { GAMES } from "@/lib/games";
+
+export default function Games() {
+  return (
+    <div className="fade-in">
+      <section className="av-hero">
+        <h1 className="flicker">ARCADE VAULT</h1>
+        <div className="sub">
+          INSERTA UNA MONEDA PARA JUGAR <span className="blink">_</span>
+        </div>
+      </section>
+
+      <GameBrowser games={GAMES} />
+    </div>
+  );
+}
