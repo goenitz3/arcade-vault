@@ -1,4 +1,5 @@
-import type { ScoreRow } from "@/lib/types";
+import { GAMES } from "@/lib/games";
+import type { AccentColor, ScoreRow } from "@/lib/types";
 
 const PLAYERS = [
   "PX_KAI",
@@ -78,4 +79,31 @@ export function detailScores(id: string): ScoreRow[] {
 /** Ranking del Salón de la Fama: 12 filas. */
 export function hallScores(id: string): ScoreRow[] {
   return seededScores(seedFromId(id) * 23 + 7, 12);
+}
+
+/** Top jugadores del día para la landing: 5 filas, semilla fija. */
+export function topPlayersToday(count = 5): ScoreRow[] {
+  return seededScores(4242, count);
+}
+
+export type ActivityRow = {
+  player: string;
+  game: string;
+  score: number;
+  minutesAgo: number;
+  color: AccentColor;
+};
+
+const ACTIVITY_MINUTES_AGO = [2, 5, 8, 12, 18, 24, 31];
+
+/** Actividad reciente para el ticker de la landing: 7 filas, semilla fija. */
+export function recentActivity(count = 7): ActivityRow[] {
+  const scores = seededScores(1337, count);
+  return scores.map((row, i) => ({
+    player: row.name,
+    game: GAMES[i % GAMES.length].title,
+    score: row.score,
+    minutesAgo: ACTIVITY_MINUTES_AGO[i % ACTIVITY_MINUTES_AGO.length],
+    color: GAMES[i % GAMES.length].color,
+  }));
 }
