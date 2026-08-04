@@ -18,12 +18,12 @@ export default function AuthPage() {
   const submit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     login(name);
-    router.push("/");
+    router.push("/games");
   };
 
   const enterAsGuest = () => {
     signOut();
-    router.push("/");
+    router.push("/games");
   };
 
   return (
