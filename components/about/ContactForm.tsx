@@ -113,7 +113,7 @@ export default function ContactForm() {
           </div>
 
           {error && (
-            <div className="terminal-success" style={{ marginBottom: 16 }}>
+            <div className="terminal-success is-error" style={{ marginBottom: 16 }}>
               <div className="term-bar">
                 <span className="dot r"></span>
                 <span className="dot y"></span>
@@ -121,7 +121,7 @@ export default function ContactForm() {
                 <span className="term-title">VAULT-OS // TERMINAL</span>
               </div>
               <div className="term-body">
-                <div className="line neon-magenta">[ERROR] {error}</div>
+                <div className="line">[ERROR] {error}</div>
               </div>
             </div>
           )}
