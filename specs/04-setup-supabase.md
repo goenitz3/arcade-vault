@@ -15,9 +15,10 @@
   (`createBrowserClient`), para usarse en componentes `"use client"`.
 - Crear `lib/supabase/server.ts`: cliente Supabase para el servidor
   (`createServerClient`), para usarse en Server Components y Route Handlers.
-- Añadir `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` a
-  `.env.local.example` (sin valores) y a `.env.local` (no versionado, como
-  placeholders vacíos que el desarrollador completa manualmente).
+- Añadir `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+  y `SUPABASE_DB_PASSWORD` a `.env.local.example` (sin valores) y a
+  `.env.local` (no versionado, con los valores reales del proyecto Supabase
+  del desarrollador).
 
 **Fuera de alcance (para specs futuras):**
 
@@ -41,7 +42,7 @@ import { createBrowserClient } from "@supabase/ssr";
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
   );
 }
 ```
@@ -55,7 +56,7 @@ export async function createClient() {
   const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } },
   );
 }
@@ -65,8 +66,14 @@ export async function createClient() {
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_DB_PASSWORD=
 ```
+
+`SUPABASE_DB_PASSWORD` no se usa en ningún cliente de esta spec (queda
+reservada para conexión directa a Postgres en una spec futura); se
+documenta ahora por consistencia, ya que forma parte de las credenciales
+del mismo proyecto Supabase.
 
 Se agregan también a `.env.local.example` (sin valores), junto a
 `RESEND_API_KEY` y `CONTACT_TO_EMAIL` ya existentes.
@@ -80,14 +87,17 @@ Cada paso deja la aplicación compilando. Verificación con
    (`npm install @supabase/supabase-js @supabase/ssr`).
    Verificación: ambos paquetes aparecen en `package.json`.
 
-2. **Variables de entorno.** Añadir `NEXT_PUBLIC_SUPABASE_URL` y
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY` (sin valores) a `.env.local.example` y a
-   `.env.local`, junto a las claves de Resend existentes.
-   Verificación: ambas claves existen en los dos archivos;
+2. **Variables de entorno.** Añadir `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_DB_PASSWORD` (sin
+   valores) a `.env.local.example`, y con los valores reales del proyecto
+   Supabase del desarrollador a `.env.local`, junto a las claves de Resend
+   existentes.
+   Verificación: las tres claves existen en los dos archivos;
    `.env.local` sigue sin versionarse (`git status` no lo muestra).
 
 3. **Cliente browser.** Crear `lib/supabase/client.ts` con
-   `createClient()` sobre `createBrowserClient`, según el modelo de datos.
+   `createClient()` sobre `createBrowserClient`, usando
+   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, según el modelo de datos.
    Verificación: `npx tsc --noEmit` no reporta errores; el módulo se puede
    importar desde un componente `"use client"` sin fallar en build.
 
@@ -108,11 +118,11 @@ Cada paso deja la aplicación compilando. Verificación con
 - [ ] `lib/supabase/server.ts` existe y exporta una función que crea un
       cliente Supabase con `createServerClient`, leyendo cookies de
       `next/headers`.
-- [ ] `.env.local.example` incluye `NEXT_PUBLIC_SUPABASE_URL` y
-      `NEXT_PUBLIC_SUPABASE_ANON_KEY` sin valores, junto a las claves de
-      Resend ya existentes.
-- [ ] `.env.local` incluye las mismas dos claves (con o sin valor real,
-      según lo que el desarrollador complete) y no aparece en `git status`.
+- [ ] `.env.local.example` incluye `NEXT_PUBLIC_SUPABASE_URL`,
+      `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_DB_PASSWORD` sin
+      valores, junto a las claves de Resend ya existentes.
+- [ ] `.env.local` incluye las mismas tres claves con los valores reales
+      del proyecto Supabase, y no aparece en `git status`.
 - [ ] No se modificó `lib/session.tsx`, `app/auth/page.tsx` ni ninguna
       pantalla existente.
 
