@@ -1,6 +1,6 @@
 # SPEC 04 — Setup de Supabase
 
-> **Estado:** Aprovado
+> **Estado:** Imlementado
 > **Depende de:** 03-about-contact-form
 > **Fecha:** 2026-08-13
 > **Objetivo:** Instalar y configurar el SDK de Supabase (cliente browser y server) con sus variables de entorno, dejando el proyecto listo para implementar autenticación y base de datos en specs futuras.
