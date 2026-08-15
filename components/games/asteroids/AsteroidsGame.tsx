@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
@@ -19,6 +20,7 @@ export default function AsteroidsGame({ game }: { game: Game }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<AsteroidsEngine | null>(null);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(INITIAL_SNAPSHOT);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,6 +61,33 @@ export default function AsteroidsGame({ game }: { game: Game }) {
             <div className="v">{String(snapshot.level).padStart(2, "0")}</div>
           </div>
         </div>
+        <div className="hud-actions">
+          <button
+            className="btn yellow"
+            onClick={() => {
+              const engine = engineRef.current;
+              if (!engine) return;
+              if (paused) {
+                engine.resume();
+                setPaused(false);
+              } else {
+                engine.pause();
+                setPaused(true);
+              }
+            }}
+          >
+            {paused ? "REANUDAR" : "PAUSA"}
+          </button>
+          <button
+            className="btn magenta"
+            onClick={() => engineRef.current?.forceGameOver()}
+          >
+            FIN
+          </button>
+          <Link className="btn ghost" href={`/juegos/${game.id}`}>
+            SALIR
+          </Link>
+        </div>
       </div>
 
       <div className="crt">
@@ -69,6 +98,29 @@ export default function AsteroidsGame({ game }: { game: Game }) {
             height={600}
             style={{ width: "100%", height: "100%", display: "block" }}
           />
+          {paused && (
+            <div
+              className="crt-content"
+              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+            >
+              <div>
+                <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
+                  EN PAUSA
+                </div>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ink-dim)",
+                    marginTop: 10,
+                    letterSpacing: "0.16em",
+                  }}
+                >
+                  PULSA REANUDAR PARA CONTINUAR
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
