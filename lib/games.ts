@@ -1,13 +1,7 @@
 import type { Game } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 
-export const CATS = [
-  "TODOS",
-  "ARCADE",
-  "PUZZLE",
-  "SHOOTER",
-  "VERSUS",
-] as const satisfies readonly string[];
+export { CATS } from "@/lib/categories";
 
 export async function getGames(): Promise<Game[]> {
   const supabase = await createClient();
