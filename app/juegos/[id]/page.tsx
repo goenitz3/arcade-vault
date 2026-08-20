@@ -2,18 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Leaderboard from "@/components/Leaderboard";
-import { GAMES, getGame } from "@/lib/games";
+import { getGame, getGames } from "@/lib/games";
 import { detailScores } from "@/lib/scores";
 
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
+export async function generateStaticParams() {
+  const games = await getGames();
+  return games.map((g) => ({ id: g.id }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/juegos/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const game = getGame(id);
+  const game = await getGame(id);
   if (!game) return { title: "Juego no encontrado · Arcade Vault" };
   return {
     title: `${game.title} · Arcade Vault`,
@@ -25,7 +26,7 @@ export default async function GameDetailPage({
   params,
 }: PageProps<"/juegos/[id]">) {
   const { id } = await params;
-  const game = getGame(id);
+  const game = await getGame(id);
   if (!game) notFound();
 
   const scores = detailScores(game.id);

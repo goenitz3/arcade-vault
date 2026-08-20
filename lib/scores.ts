@@ -1,5 +1,4 @@
-import { GAMES } from "@/lib/games";
-import type { AccentColor, ScoreRow } from "@/lib/types";
+import type { AccentColor, Game, ScoreRow } from "@/lib/types";
 
 const PLAYERS = [
   "PX_KAI",
@@ -97,13 +96,13 @@ export type ActivityRow = {
 const ACTIVITY_MINUTES_AGO = [2, 5, 8, 12, 18, 24, 31];
 
 /** Actividad reciente para el ticker de la landing: 7 filas, semilla fija. */
-export function recentActivity(count = 7): ActivityRow[] {
+export function recentActivity(games: Game[], count = 7): ActivityRow[] {
   const scores = seededScores(1337, count);
   return scores.map((row, i) => ({
     player: row.name,
-    game: GAMES[i % GAMES.length].title,
+    game: games[i % games.length].title,
     score: row.score,
     minutesAgo: ACTIVITY_MINUTES_AGO[i % ACTIVITY_MINUTES_AGO.length],
-    color: GAMES[i % GAMES.length].color,
+    color: games[i % games.length].color,
   }));
 }
