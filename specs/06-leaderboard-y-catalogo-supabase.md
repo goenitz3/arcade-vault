@@ -1,6 +1,6 @@
 # SPEC 06 — Leaderboard y catálogo de juegos en Supabase
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** 04-setup-supabase, 05-asteroids-game
 > **Fecha:** 2026-08-19
 > **Objetivo:** Migrar el catálogo de juegos (`lib/games.ts`) a una tabla `games` de solo lectura en Supabase y persistir las puntuaciones reales de Asteroids en una tabla `scores` de Supabase, reemplazando el array hardcodeado y el `localStorage` (`av_scores`) para ese juego mientras los otros 7 juegos siguen usando datos simulados como hoy.
