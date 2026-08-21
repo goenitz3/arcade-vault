@@ -1,7 +1,8 @@
 import GameBrowser from "@/components/GameBrowser";
-import { GAMES } from "@/lib/games";
+import { getGames } from "@/lib/games";
 
-export default function Games() {
+export default async function Games() {
+  const games = await getGames();
   return (
     <div className="fade-in">
       <section className="av-hero">
@@ -11,7 +12,7 @@ export default function Games() {
         </div>
       </section>
 
-      <GameBrowser games={GAMES} />
+      <GameBrowser games={games} />
     </div>
   );
 }

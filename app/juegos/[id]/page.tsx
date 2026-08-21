@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Leaderboard from "@/components/Leaderboard";
-import { GAMES, getGame } from "@/lib/games";
+import { getGame, getGames } from "@/lib/games";
 import { detailScores } from "@/lib/scores";
+import { topAsteroidsScores } from "@/lib/scores-supabase-server";
 
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
+export async function generateStaticParams() {
+  const games = await getGames();
+  return games.map((g) => ({ id: g.id }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/juegos/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const game = getGame(id);
+  const game = await getGame(id);
   if (!game) return { title: "Juego no encontrado · Arcade Vault" };
   return {
     title: `${game.title} · Arcade Vault`,
@@ -25,10 +27,11 @@ export default async function GameDetailPage({
   params,
 }: PageProps<"/juegos/[id]">) {
   const { id } = await params;
-  const game = getGame(id);
+  const game = await getGame(id);
   if (!game) notFound();
 
-  const scores = detailScores(game.id);
+  const scores =
+    game.id === "asteroids" ? await topAsteroidsScores(10) : detailScores(game.id);
 
   return (
     <div className="av-detail fade-in">
@@ -87,7 +90,22 @@ export default async function GameDetailPage({
       </div>
 
       <aside>
-        <Leaderboard rows={scores} />
+        {game.id === "asteroids" && scores.length === 0 ? (
+          <div className="leaderboard">
+            <h3>MEJORES PUNTUACIONES</h3>
+            <div style={{ textAlign: "center", padding: "32px 16px" }}>
+              <div
+                className="pixel"
+                style={{ fontSize: 12, color: "var(--magenta)", marginBottom: 10 }}
+              >
+                AÚN SIN PUNTUACIONES
+              </div>
+              <div>Sé el primero en aparecer aquí.</div>
+            </div>
+          </div>
+        ) : (
+          <Leaderboard rows={scores} />
+        )}
       </aside>
     </div>
   );

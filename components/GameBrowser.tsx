@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import GameCard from "@/components/GameCard";
-import { CATS } from "@/lib/games";
+import { CATS } from "@/lib/categories";
 import type { Game } from "@/lib/types";
 
 export default function GameBrowser({ games }: { games: Game[] }) {

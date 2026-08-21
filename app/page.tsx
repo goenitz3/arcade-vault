@@ -4,7 +4,7 @@ import FloatingSilhouettes from "@/components/landing/FloatingSilhouettes";
 import GamePreviewRail from "@/components/landing/GamePreviewRail";
 import ActivityFeed from "@/components/landing/ActivityFeed";
 import Reveal from "@/components/Reveal";
-import { GAMES } from "@/lib/games";
+import { getGames } from "@/lib/games";
 import { recentActivity, topPlayersToday } from "@/lib/scores";
 
 const FEATURES = [
@@ -34,15 +34,15 @@ const FEATURES = [
   },
 ] as const;
 
-const STATS = [
-  { n: `${GAMES.length}+`, u: "JUEGOS", s: "Y CONTANDO" },
-  { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
-  { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
-];
-
-export default function Home() {
-  const previewGames = GAMES.slice(0, 6);
-  const activity = recentActivity();
+export default async function Home() {
+  const games = await getGames();
+  const STATS = [
+    { n: `${games.length}+`, u: "JUEGOS", s: "Y CONTANDO" },
+    { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
+    { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
+  ];
+  const previewGames = games.slice(0, 6);
+  const activity = recentActivity(games);
   const topPlayers = topPlayersToday();
 
   return (

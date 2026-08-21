@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { saveAsteroidsScore } from "@/lib/scores-supabase";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
 import { createEngine, type AsteroidsEngine, type EngineSnapshot } from "./engine";
@@ -14,7 +15,7 @@ const INITIAL_SNAPSHOT: EngineSnapshot = {
 };
 
 export default function AsteroidsGame({ game }: { game: Game }) {
-  const { user, saveScore } = useSession();
+  const { user } = useSession();
 
   // El nombre editado por el jugador tiene prioridad; si no ha tocado el campo
   // se usa la sesión, que aparece tras hidratar.
@@ -160,8 +161,8 @@ export default function AsteroidsGame({ game }: { game: Game }) {
                 />
                 <button
                   className="btn yellow"
-                  onClick={() => {
-                    saveScore({ game: game.id, score: snapshot.score, name });
+                  onClick={async () => {
+                    await saveAsteroidsScore({ playerName: name, score: snapshot.score });
                     setSaved(true);
                   }}
                 >

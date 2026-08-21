@@ -32,3 +32,11 @@ export type SavedScore = {
   name: string;
   at: number;
 };
+
+export type ScoreRecord = {
+  id: string;
+  game_id: string;
+  player_name: string;
+  score: number;
+  created_at: string;
+};
