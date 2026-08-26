@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import AsteroidsGame from "@/components/games/asteroids/AsteroidsGame";
 import GamePlayer from "@/components/GamePlayer";
+import { ENGINE_COMPONENTS } from "@/components/games/engine-registry";
 import { getGame, getGames } from "@/lib/games";
 
 export async function generateStaticParams() {
@@ -25,6 +25,7 @@ export default async function GamePlayerPage({
   const game = await getGame(id);
   if (!game) notFound();
 
-  if (game.id === "asteroids") return <AsteroidsGame game={game} />;
+  const Engine = ENGINE_COMPONENTS[id];
+  if (Engine) return <Engine game={game} />;
   return <GamePlayer game={game} />;
 }
