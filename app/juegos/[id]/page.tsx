@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Leaderboard from "@/components/Leaderboard";
 import { getGame, getGames } from "@/lib/games";
 import { detailScores } from "@/lib/scores";
-import { topAsteroidsScores } from "@/lib/scores-supabase-server";
+import { topScores } from "@/lib/scores-supabase-server";
 
 export async function generateStaticParams() {
   const games = await getGames();
@@ -31,7 +31,7 @@ export default async function GameDetailPage({
   if (!game) notFound();
 
   const scores =
-    game.id === "asteroids" ? await topAsteroidsScores(10) : detailScores(game.id);
+    game.id === "asteroids" ? await topScores("asteroids", 10) : detailScores(game.id);
 
   return (
     <div className="av-detail fade-in">

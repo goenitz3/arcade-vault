@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { saveAsteroidsScore } from "@/lib/scores-supabase";
+import { saveScore } from "@/lib/scores-supabase";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
 import { createEngine, type AsteroidsEngine, type EngineSnapshot } from "./engine";
@@ -162,7 +162,7 @@ export default function AsteroidsGame({ game }: { game: Game }) {
                 <button
                   className="btn yellow"
                   onClick={async () => {
-                    await saveAsteroidsScore({ playerName: name, score: snapshot.score });
+                    await saveScore({ gameId: "asteroids", playerName: name, score: snapshot.score });
                     setSaved(true);
                   }}
                 >
