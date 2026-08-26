@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { GAMES_WITH_ENGINE } from "@/lib/games-with-engine";
 import { hallScores } from "@/lib/scores";
 import { useSession } from "@/lib/session";
 import type { Game, ScoreRow } from "@/lib/types";
-
-const ASTEROIDS_ID = "asteroids";
 
 /** Clase de destaque para los tres primeros puestos. */
 function topClass(index: number): string {
@@ -18,19 +17,19 @@ function topClass(index: number): string {
 
 export default function SalonHallOfFame({
   games,
-  asteroidsScores,
+  realScores,
 }: {
   games: Game[];
-  asteroidsScores: ScoreRow[];
+  realScores: Record<string, ScoreRow[]>;
 }) {
   const { user } = useSession();
   const [tab, setTab] = useState(games[0].id);
 
-  const isAsteroids = tab === ASTEROIDS_ID;
+  const hasEngine = (GAMES_WITH_ENGINE as readonly string[]).includes(tab);
   const simulatedRows = useMemo(() => hallScores(tab), [tab]);
-  const rows = isAsteroids ? asteroidsScores : simulatedRows;
+  const rows = hasEngine ? realScores[tab] : simulatedRows;
   const game = games.find((g) => g.id === tab)!;
-  const empty = isAsteroids && rows.length === 0;
+  const empty = hasEngine && rows.length === 0;
 
   // Marca decorativa del jugador: la spec deja fuera integrar av_scores aquí.
   const youRank = 8 + (tab.length % 4);
