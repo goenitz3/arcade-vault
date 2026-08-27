@@ -276,8 +276,16 @@ export function createEngine(canvas: HTMLCanvasElement): ArkanoidEngine {
     if (e.key in keys) keys[e.key] = false;
   }
 
+  function onMouseMove(e: MouseEvent) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width;
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    paddle.x = Math.max(0, Math.min(CANVAS_W - paddle.w, mouseX - paddle.w / 2));
+  }
+
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
+  canvas.addEventListener("mousemove", onMouseMove);
 
   function init() {
     lives = 3;
@@ -328,6 +336,7 @@ export function createEngine(canvas: HTMLCanvasElement): ArkanoidEngine {
     pause();
     window.removeEventListener("keydown", onKeyDown);
     window.removeEventListener("keyup", onKeyUp);
+    canvas.removeEventListener("mousemove", onMouseMove);
     listeners.clear();
   }
 
