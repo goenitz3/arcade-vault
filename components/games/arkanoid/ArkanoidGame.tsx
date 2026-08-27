@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { saveScore } from "@/lib/scores-supabase";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
 import { createEngine, type ArkanoidEngine, type EngineSnapshot } from "./engine";
@@ -25,6 +26,15 @@ export default function ArkanoidGame({ game }: { game: Game }) {
   const engineRef = useRef<ArkanoidEngine | null>(null);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(INITIAL_SNAPSHOT);
   const [paused, setPaused] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const over = snapshot.state === "gameover" || snapshot.state === "win";
+
+  const restart = () => {
+    setPaused(false);
+    setSaved(false);
+    engineRef.current?.start();
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -149,6 +159,47 @@ export default function ArkanoidGame({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {over && (
+        <div className="modal-bd">
+          <div className="modal">
+            <h2>{snapshot.state === "win" ? "¡COMPLETASTE EL JUEGO!" : "FIN DEL JUEGO"}</h2>
+            <div className="final-label">PUNTUACIÓN FINAL</div>
+            <div className="final">{snapshot.score.toLocaleString("es-ES")}</div>
+            {!saved ? (
+              <div className="input-row">
+                <input
+                  value={name}
+                  onChange={(e) =>
+                    setEditedName(e.target.value.toUpperCase().slice(0, 10))
+                  }
+                  placeholder="TUS INICIALES"
+                  aria-label="Nombre para la puntuación"
+                />
+                <button
+                  className="btn yellow"
+                  onClick={async () => {
+                    await saveScore({ gameId: "arkanoid", playerName: name, score: snapshot.score });
+                    setSaved(true);
+                  }}
+                >
+                  GUARDAR PUNTUACIÓN
+                </button>
+              </div>
+            ) : (
+              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+            )}
+            <div className="actions">
+              <button className="btn" onClick={restart}>
+                JUGAR DE NUEVO
+              </button>
+              <Link className="btn magenta" href="/games">
+                VOLVER AL VAULT
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
