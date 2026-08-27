@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Leaderboard from "@/components/Leaderboard";
 import { getGame, getGames } from "@/lib/games";
+import { GAMES_WITH_ENGINE } from "@/lib/games-with-engine";
 import { detailScores } from "@/lib/scores";
-import { topAsteroidsScores } from "@/lib/scores-supabase-server";
+import { topScores } from "@/lib/scores-supabase-server";
 
 export async function generateStaticParams() {
   const games = await getGames();
@@ -30,8 +31,8 @@ export default async function GameDetailPage({
   const game = await getGame(id);
   if (!game) notFound();
 
-  const scores =
-    game.id === "asteroids" ? await topAsteroidsScores(10) : detailScores(game.id);
+  const hasEngine = (GAMES_WITH_ENGINE as readonly string[]).includes(game.id);
+  const scores = hasEngine ? await topScores(game.id, 10) : detailScores(game.id);
 
   return (
     <div className="av-detail fade-in">
@@ -90,7 +91,7 @@ export default async function GameDetailPage({
       </div>
 
       <aside>
-        {game.id === "asteroids" && scores.length === 0 ? (
+        {hasEngine && scores.length === 0 ? (
           <div className="leaderboard">
             <h3>MEJORES PUNTUACIONES</h3>
             <div style={{ textAlign: "center", padding: "32px 16px" }}>

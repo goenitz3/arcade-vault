@@ -5,16 +5,47 @@ import { useEffect, useRef, useState } from "react";
 import { saveScore } from "@/lib/scores-supabase";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
-import { createEngine, type AsteroidsEngine, type EngineSnapshot } from "./engine";
+import { COLORS, createEngine, type EngineSnapshot, type TetrisEngine, type TetrisTheme } from "./engine";
+
+const THEME_STORAGE_KEY = "tetris-theme";
 
 const INITIAL_SNAPSHOT: EngineSnapshot = {
   score: 0,
-  lives: 3,
+  lines: 0,
   level: 1,
+  nextPiece: [],
   state: "playing",
 };
 
-export default function AsteroidsGame({ game }: { game: Game }) {
+function NextPiecePreview({ shape }: { shape: number[][] }) {
+  const size = shape.length;
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${size || 1}, 20px)`,
+        gridTemplateRows: `repeat(${size || 1}, 20px)`,
+        gap: 2,
+      }}
+    >
+      {shape.flatMap((row, r) =>
+        row.map((value, c) => (
+          <div
+            key={`${r}-${c}`}
+            style={{
+              width: 20,
+              height: 20,
+              background: value ? COLORS[value] : "transparent",
+              borderRadius: 2,
+            }}
+          />
+        ))
+      )}
+    </div>
+  );
+}
+
+export default function TetrisGame({ game }: { game: Game }) {
   const { user } = useSession();
 
   // El nombre editado por el jugador tiene prioridad; si no ha tocado el campo
@@ -23,10 +54,11 @@ export default function AsteroidsGame({ game }: { game: Game }) {
   const name = editedName ?? user?.name ?? "INVITADO";
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const engineRef = useRef<AsteroidsEngine | null>(null);
+  const engineRef = useRef<TetrisEngine | null>(null);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(INITIAL_SNAPSHOT);
   const [paused, setPaused] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [theme, setTheme] = useState<TetrisTheme>("dark");
 
   const over = snapshot.state === "gameover";
 
@@ -36,6 +68,13 @@ export default function AsteroidsGame({ game }: { game: Game }) {
     engineRef.current?.start();
   };
 
+  const toggleTheme = () => {
+    const next: TetrisTheme = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    engineRef.current?.setTheme(next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -43,6 +82,12 @@ export default function AsteroidsGame({ game }: { game: Game }) {
     const engine = createEngine(canvas);
     engineRef.current = engine;
     const unsubscribe = engine.onChange(setSnapshot);
+
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const initialTheme: TetrisTheme = storedTheme === "light" ? "light" : "dark";
+    setTheme(initialTheme);
+    engine.setTheme(initialTheme);
+
     engine.start();
 
     return () => {
@@ -53,9 +98,9 @@ export default function AsteroidsGame({ game }: { game: Game }) {
   }, []);
 
   return (
-    <div className="av-player fade-in">
+    <div className={"av-player fade-in" + (theme === "light" ? " tetris-light" : "")}>
       <div className="player-hud">
-        <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center" }}>
           <div className="hud-stat">
             <div className="l">Jugador</div>
             <div className="v" style={{ color: "var(--ink)" }}>
@@ -66,13 +111,17 @@ export default function AsteroidsGame({ game }: { game: Game }) {
             <div className="l">Puntuación</div>
             <div className="v">{snapshot.score.toLocaleString("es-ES")}</div>
           </div>
-          <div className="hud-stat lives">
-            <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(snapshot.lives).trim()}</div>
+          <div className="hud-stat">
+            <div className="l">Líneas</div>
+            <div className="v">{snapshot.lines}</div>
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
             <div className="v">{String(snapshot.level).padStart(2, "0")}</div>
+          </div>
+          <div className="hud-stat">
+            <div className="l">Siguiente</div>
+            <NextPiecePreview shape={snapshot.nextPiece} />
           </div>
         </div>
         <div className="hud-actions">
@@ -101,6 +150,9 @@ export default function AsteroidsGame({ game }: { game: Game }) {
           <Link className="btn ghost" href={`/juegos/${game.id}`}>
             SALIR
           </Link>
+          <button className="btn ghost" onClick={toggleTheme}>
+            {theme === "light" ? "☀ DARK" : "☾ LIGHT"}
+          </button>
         </div>
       </div>
 
@@ -108,7 +160,7 @@ export default function AsteroidsGame({ game }: { game: Game }) {
         <div className="crt-screen">
           <canvas
             ref={canvasRef}
-            width={800}
+            width={300}
             height={600}
             style={{ width: "100%", height: "100%", display: "block" }}
           />
@@ -162,7 +214,7 @@ export default function AsteroidsGame({ game }: { game: Game }) {
                 <button
                   className="btn yellow"
                   onClick={async () => {
-                    await saveScore({ gameId: "asteroids", playerName: name, score: snapshot.score });
+                    await saveScore({ gameId: "tetris", playerName: name, score: snapshot.score });
                     setSaved(true);
                   }}
                 >
