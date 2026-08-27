@@ -7,7 +7,6 @@ const CANVAS_H = 600;
 
 const PADDLE_SPEED = 400;
 const BLOCK_COLS = 10;
-const BLOCK_ROWS = 6;
 const BLOCK_W = 64;
 const BLOCK_H = 24;
 const BLOCKS_ORIGIN_X = (CANVAS_W - BLOCK_COLS * BLOCK_W) / 2;
