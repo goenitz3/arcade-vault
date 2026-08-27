@@ -804,6 +804,24 @@ a { color: inherit; text-decoration: none; }
 @keyframes typewriter { to { width: 22ch; } }
 @keyframes caret { 50% { border-color: transparent; } }
 
+/* ===== tetris: toggle de tema claro/oscuro (acotado a esta pantalla) ===== */
+.tetris-light .player-hud {
+  background: #e4e4f0;
+  border-color: #b0b0c8;
+}
+.tetris-light .hud-stat .l { color: #6060a0; }
+.tetris-light .crt-bottom { color: #404060; }
+.tetris-light .crt-content { color: #1a1a2e; }
+.tetris-light .modal {
+  background: #f0f0f8;
+  color: #1a1a2e;
+}
+.tetris-light .modal .input-row input {
+  background: #e4e4f0;
+  border-color: #9090b8;
+  color: #1a1a2e;
+}
+
 /* ===== auth ===== */
 .av-auth-wrap {
   display: flex; align-items: center; justify-content: center;

@@ -67,6 +67,8 @@ export type EngineSnapshot = {
   state: "playing" | "gameover";
 };
 
+export type TetrisTheme = "dark" | "light";
+
 export type TetrisEngine = {
   start(): void;
   pause(): void;
@@ -74,6 +76,12 @@ export type TetrisEngine = {
   forceGameOver(): void;
   destroy(): void;
   onChange(cb: (snapshot: EngineSnapshot) => void): () => void;
+  setTheme(theme: TetrisTheme): void;
+};
+
+const THEME_COLORS: Record<TetrisTheme, { boardBg: string; gridLine: string }> = {
+  dark: { boardBg: "#1a1a25", gridLine: "rgba(255,255,255,0.06)" },
+  light: { boardBg: "#e4e4f0", gridLine: "rgba(0,0,0,0.08)" },
 };
 
 type Piece = { type: number; shape: PieceShape; x: number; y: number };
@@ -91,6 +99,7 @@ export function createEngine(canvas: HTMLCanvasElement): TetrisEngine {
   let dropInterval = 1000;
   let dropAccum = 0;
   let state: EngineSnapshot["state"] = "playing";
+  let theme: TetrisTheme = "dark";
 
   const listeners = new Set<(snapshot: EngineSnapshot) => void>();
 
@@ -223,7 +232,7 @@ export function createEngine(canvas: HTMLCanvasElement): TetrisEngine {
 
   function drawGrid() {
     if (!ctx) return;
-    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    ctx.strokeStyle = THEME_COLORS[theme].gridLine;
     ctx.lineWidth = 0.5;
     for (let c = 1; c < COLS; c++) {
       ctx.beginPath();
@@ -241,7 +250,7 @@ export function createEngine(canvas: HTMLCanvasElement): TetrisEngine {
 
   function draw() {
     if (!ctx) return;
-    ctx.fillStyle = "#1a1a25";
+    ctx.fillStyle = THEME_COLORS[theme].boardBg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid();
 
@@ -362,5 +371,10 @@ export function createEngine(canvas: HTMLCanvasElement): TetrisEngine {
     return () => listeners.delete(cb);
   }
 
-  return { start, pause, resume, forceGameOver, destroy, onChange };
+  function setTheme(next: TetrisTheme) {
+    theme = next;
+    if (board.length) draw();
+  }
+
+  return { start, pause, resume, forceGameOver, destroy, onChange, setTheme };
 }

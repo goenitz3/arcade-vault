@@ -5,7 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { saveScore } from "@/lib/scores-supabase";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
-import { COLORS, createEngine, type EngineSnapshot, type TetrisEngine } from "./engine";
+import { COLORS, createEngine, type EngineSnapshot, type TetrisEngine, type TetrisTheme } from "./engine";
+
+const THEME_STORAGE_KEY = "tetris-theme";
 
 const INITIAL_SNAPSHOT: EngineSnapshot = {
   score: 0,
@@ -56,6 +58,7 @@ export default function TetrisGame({ game }: { game: Game }) {
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(INITIAL_SNAPSHOT);
   const [paused, setPaused] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [theme, setTheme] = useState<TetrisTheme>("dark");
 
   const over = snapshot.state === "gameover";
 
@@ -65,6 +68,13 @@ export default function TetrisGame({ game }: { game: Game }) {
     engineRef.current?.start();
   };
 
+  const toggleTheme = () => {
+    const next: TetrisTheme = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    engineRef.current?.setTheme(next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -72,6 +82,12 @@ export default function TetrisGame({ game }: { game: Game }) {
     const engine = createEngine(canvas);
     engineRef.current = engine;
     const unsubscribe = engine.onChange(setSnapshot);
+
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const initialTheme: TetrisTheme = storedTheme === "light" ? "light" : "dark";
+    setTheme(initialTheme);
+    engine.setTheme(initialTheme);
+
     engine.start();
 
     return () => {
@@ -82,7 +98,7 @@ export default function TetrisGame({ game }: { game: Game }) {
   }, []);
 
   return (
-    <div className="av-player fade-in">
+    <div className={"av-player fade-in" + (theme === "light" ? " tetris-light" : "")}>
       <div className="player-hud">
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center" }}>
           <div className="hud-stat">
@@ -134,6 +150,9 @@ export default function TetrisGame({ game }: { game: Game }) {
           <Link className="btn ghost" href={`/juegos/${game.id}`}>
             SALIR
           </Link>
+          <button className="btn ghost" onClick={toggleTheme}>
+            {theme === "light" ? "☀ DARK" : "☾ LIGHT"}
+          </button>
         </div>
       </div>
 

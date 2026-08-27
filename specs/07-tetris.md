@@ -1,6 +1,6 @@
 # SPEC 07 — Generalización de motor/puntuación y juego jugable de Tetris
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** 05-asteroids-game, 06-leaderboard-y-catalogo-supabase
 > **Fecha:** 2026-08-26
 > **Objetivo:** Generalizar la infraestructura de motor y guardado de
