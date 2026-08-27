@@ -296,6 +296,10 @@ export function createEngine(canvas: HTMLCanvasElement): ArkanoidEngine {
   }
 
   function start() {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
     init();
     running = true;
     lastTime = null;
