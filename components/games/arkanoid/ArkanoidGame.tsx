@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
 import { createEngine, type ArkanoidEngine, type EngineSnapshot } from "./engine";
 
@@ -11,10 +13,18 @@ const INITIAL_SNAPSHOT: EngineSnapshot = {
   state: "playing",
 };
 
+const LEVEL_COUNT = 5;
+
 export default function ArkanoidGame({ game }: { game: Game }) {
+  const { user } = useSession();
+
+  const [editedName, setEditedName] = useState<string | null>(null);
+  const name = editedName ?? user?.name ?? "INVITADO";
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<ArkanoidEngine | null>(null);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(INITIAL_SNAPSHOT);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -38,6 +48,12 @@ export default function ArkanoidGame({ game }: { game: Game }) {
       <div className="player-hud">
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center" }}>
           <div className="hud-stat">
+            <div className="l">Jugador</div>
+            <div className="v" style={{ color: "var(--ink)" }}>
+              {name}
+            </div>
+          </div>
+          <div className="hud-stat">
             <div className="l">Puntuación</div>
             <div className="v">{snapshot.score.toLocaleString("es-ES")}</div>
           </div>
@@ -50,6 +66,30 @@ export default function ArkanoidGame({ game }: { game: Game }) {
             <div className="v">{String(snapshot.level).padStart(2, "0")}</div>
           </div>
         </div>
+        <div className="hud-actions">
+          <button
+            className="btn yellow"
+            onClick={() => {
+              const engine = engineRef.current;
+              if (!engine) return;
+              if (paused) {
+                engine.resume();
+                setPaused(false);
+              } else {
+                engine.pause();
+                setPaused(true);
+              }
+            }}
+          >
+            {paused ? "REANUDAR" : "PAUSA"}
+          </button>
+          <button className="btn magenta" onClick={() => engineRef.current?.forceGameOver()}>
+            FIN
+          </button>
+          <Link className="btn ghost" href={`/juegos/${game.id}`}>
+            SALIR
+          </Link>
+        </div>
       </div>
 
       <div className="crt">
@@ -60,6 +100,48 @@ export default function ArkanoidGame({ game }: { game: Game }) {
             height={600}
             style={{ width: "100%", height: "100%", display: "block" }}
           />
+          {paused && (
+            <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
+              <div>
+                <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
+                  EN PAUSA
+                </div>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ink-dim)",
+                    marginTop: 10,
+                    letterSpacing: "0.16em",
+                  }}
+                >
+                  PULSA REANUDAR PARA CONTINUAR
+                </div>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: 10,
+                    color: "var(--ink-dim)",
+                    marginTop: 18,
+                    letterSpacing: "0.16em",
+                  }}
+                >
+                  SALTAR A NIVEL
+                </div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 10 }}>
+                  {Array.from({ length: LEVEL_COUNT }, (_, i) => i + 1).map((n) => (
+                    <button
+                      key={n}
+                      className={"chip" + (n === snapshot.level ? " active" : "")}
+                      onClick={() => engineRef.current?.jumpToLevel(n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
