@@ -1,3 +1,3 @@
-export const GAMES_WITH_ENGINE = ["asteroids", "tetris", "arkanoid"] as const;
+export const GAMES_WITH_ENGINE = ["asteroids", "tetris", "arkanoid", "snake"] as const;
 
 export type GameWithEngineId = (typeof GAMES_WITH_ENGINE)[number];

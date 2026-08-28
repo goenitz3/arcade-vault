@@ -31,7 +31,7 @@
   25 px), serpiente con paso fijo, encolado de dirección con bloqueo de
   reversa de 180°, aparición de fruta aleatoria en celda libre, crecimiento
   y `+10` puntos por fruta, nivel `⌊frutas/5⌋ + 1` con aceleración
-  `max(60, 130 − (nivel−1)×10)` ms por paso, colisión con muros y con el
+  `max(80, 170 − (nivel−1)×10)` ms por paso, colisión con muros y con el
   propio cuerpo, y los estados `playing`/`gameover`/`win`.
 - Canvas fijo de 800×600 (mismas constantes `CELL`/`COLS`/`ROWS` que el
   original), escalado visualmente por CSS dentro de `.crt-screen`, igual
@@ -130,7 +130,8 @@ Convenciones:
   `dt` capado a 100 ms); `SnakeGame.tsx` no reimplementa el loop, solo lo
   orquesta (mismo patrón que `AsteroidsGame.tsx`/`TetrisGame.tsx`/
   `ArkanoidGame.tsx`).
-- El intervalo por paso es `max(60, 130 − (level − 1) × 10)` ms.
+- El intervalo por paso es `max(80, 170 − (level − 1) × 10)` ms (curva
+  "suave": más lenta que el juego de referencia, que usaba `max(60, 130 − …)`).
 - El encolado de dirección se valida contra la dirección ya consolidada
   (`dir`), de modo que un paso nunca puede ser una reversa de 180°.
 - `onChange` se dispara una vez por frame con el snapshot actual; el HUD de
@@ -191,7 +192,7 @@ generalización de infraestructura: esta spec solo agrega la entrada
    array de celdas, `dir`/`nextDir` con bloqueo de reversa de 180°,
    `spawnFood` en celda libre con fruta aleatoria de `FRUIT_ATLAS`,
    crecimiento y `+10` por fruta, `level = ⌊frutas/5⌋ + 1`, paso fijo con
-   intervalo `max(60, 130 − (level−1)×10)` ms y `dt` capado a 100 ms,
+   intervalo `max(80, 170 − (level−1)×10)` ms y `dt` capado a 100 ms,
    colisión con muros y cuerpo, estados `playing`/`gameover`/`win`,
    carga de `fruits.png` vía `new Image()` antes de arrancar el loop —
    siguiendo 1:1 `references/started-games/05-snake/game.js`. Exponer
@@ -274,7 +275,7 @@ generalización de infraestructura: esta spec solo agrega la entrada
 - [ ] Al comer una fruta aparece otra fruta nueva en una celda libre, con
       un sprite recortado de `fruits.png` (no una forma vectorial).
 - [ ] El nivel sube cada 5 frutas y el intervalo por paso baja según
-      `max(60, 130 − (nivel−1)×10)` ms (la serpiente se vuelve más rápida).
+      `max(80, 170 − (nivel−1)×10)` ms (la serpiente se vuelve más rápida).
 - [ ] Chocar contra un muro pone `state` en `"gameover"`.
 - [ ] Chocar contra el propio cuerpo pone `state` en `"gameover"`.
 - [ ] Ocupar las 768 celdas pone `state` en `"win"` (no `"gameover"`).
@@ -396,6 +397,13 @@ generalización de infraestructura: esta spec solo agrega la entrada
 - **Sí:** paso fijo con `dt` capado a 100 ms, el valor del juego de
   referencia. Asteroids capa a 50 ms, pero se conserva el del original de
   Snake para no alterar su sensación de juego.
+- **Sí:** bajar la curva de velocidad respecto al juego de referencia.
+  Pedido explícito del usuario: la serpiente arrancaba demasiado rápido.
+  El original usa `max(60, 130 − (nivel−1)×10)` ms; se cambia a la curva
+  "suave" `max(80, 170 − (nivel−1)×10)` ms (`STEP_BASE = 170`,
+  `STEP_MIN = 80`, `STEP_DECAY = 10` sin tocar). Sigue acelerando un
+  escalón de 10 ms por nivel, solo que desde un paso base más lento y con
+  un piso de velocidad menos agresivo.
 - **No:** estado intermedio análogo a `"dead"` de Asteroids. Snake no tiene
   reaparición: el choque lleva directo a `"gameover"`.
 

@@ -1,4 +1,6 @@
-// Motor de Snake portado 1:1 de references/started-games/05-snake/game.js.
+// Motor de Snake portado de references/started-games/05-snake/game.js.
+// Única desviación deliberada: la curva de velocidad se bajó respecto al
+// original (ver STEP_BASE / STEP_MIN abajo).
 // El tablero y la serpiente se dibujan con formas de canvas; la fruta se
 // dibuja con su recorte de public/games/snake/fruits.png (FRUIT_ATLAS).
 // El HUD y los overlays (pausa / fin / perfecto) los renderiza React, no
@@ -12,8 +14,11 @@ const CANVAS_H = 600;
 const COLS = CANVAS_W / CELL; // 32
 const ROWS = CANVAS_H / CELL; // 24
 
-const STEP_BASE = 130; // ms por paso en el nivel 1
-const STEP_MIN = 60; // ms por paso mínimo (tope de velocidad)
+// Curva de velocidad "suave" (más lenta que el juego de referencia, que
+// arrancaba en 130 ms con piso de 60): la serpiente avanza más despacio de
+// base y sigue acelerando un escalón por nivel.
+const STEP_BASE = 170; // ms por paso en el nivel 1
+const STEP_MIN = 80; // ms por paso mínimo (tope de velocidad)
 const STEP_DECAY = 10; // ms menos por cada nivel
 const FRUITS_PER_LEVEL = 5;
 const POINTS_PER_FRUIT = 10;
