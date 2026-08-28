@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { saveScore } from "@/lib/scores-supabase";
 import { useSession } from "@/lib/session";
 import type { Game } from "@/lib/types";
 import { createEngine, type EngineSnapshot, type SnakeEngine } from "./engine";
@@ -16,12 +17,22 @@ const INITIAL_SNAPSHOT: EngineSnapshot = {
 export default function SnakeGame({ game }: { game: Game }) {
   const { user } = useSession();
 
+  const [editedName, setEditedName] = useState<string | null>(null);
+  const name = editedName ?? user?.name ?? "INVITADO";
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<SnakeEngine | null>(null);
   const [snapshot, setSnapshot] = useState<EngineSnapshot>(INITIAL_SNAPSHOT);
   const [paused, setPaused] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const name = user?.name ?? "INVITADO";
+  const over = snapshot.state === "gameover" || snapshot.state === "win";
+
+  const restart = () => {
+    setPaused(false);
+    setSaved(false);
+    engineRef.current?.start();
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -124,6 +135,45 @@ export default function SnakeGame({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      {over && (
+        <div className="modal-bd">
+          <div className="modal">
+            <h2>{snapshot.state === "win" ? "¡PERFECTO!" : "FIN DEL JUEGO"}</h2>
+            <div className="final-label">PUNTUACIÓN FINAL</div>
+            <div className="final">{snapshot.score.toLocaleString("es-ES")}</div>
+            {!saved ? (
+              <div className="input-row">
+                <input
+                  value={name}
+                  onChange={(e) => setEditedName(e.target.value.toUpperCase().slice(0, 10))}
+                  placeholder="TUS INICIALES"
+                  aria-label="Nombre para la puntuación"
+                />
+                <button
+                  className="btn yellow"
+                  onClick={async () => {
+                    await saveScore({ gameId: "snake", playerName: name, score: snapshot.score });
+                    setSaved(true);
+                  }}
+                >
+                  GUARDAR PUNTUACIÓN
+                </button>
+              </div>
+            ) : (
+              <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+            )}
+            <div className="actions">
+              <button className="btn" onClick={restart}>
+                JUGAR DE NUEVO
+              </button>
+              <Link className="btn magenta" href="/games">
+                VOLVER AL VAULT
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
