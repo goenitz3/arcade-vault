@@ -1,6 +1,6 @@
 # SPEC 09 — Juego jugable de Snake
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** 05-asteroids-game, 06-leaderboard-y-catalogo-supabase, 07-tetris
 > **Fecha:** 2026-08-28
 > **Objetivo:** Portar el juego de referencia `references/started-games/05-snake/game.js` a un componente jugable real en `/juegos/snake/jugar`, renombrando el placeholder `"serpentina"` del catálogo a `"snake"` y conectando su leaderboard real a Supabase vía la infraestructura ya generalizada en la spec 07.
