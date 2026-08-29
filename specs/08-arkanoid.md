@@ -1,6 +1,6 @@
 # SPEC 08 — Juego jugable de Arkanoid
 
-> **Estado:** Aprobada
+> **Estado:** Implementado
 > **Depende de:** 05-asteroids-game, 06-leaderboard-y-catalogo-supabase, 07-tetris
 > **Fecha:** 2026-08-27
 > **Objetivo:** Portar el juego de referencia `references/started-games/04-arkanoid/game.js` a un componente jugable real en `/juegos/arkanoid/jugar`, renombrando el placeholder `"bloque-buster"` del catálogo a `"arkanoid"` y conectando su leaderboard real a Supabase vía la infraestructura ya generalizada en la spec 07.

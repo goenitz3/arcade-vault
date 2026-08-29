@@ -1,6 +1,6 @@
 # SPEC 05 — Juego jugable de Asteroids
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Depende de:** 02-landing-page
 > **Fecha:** 2026-08-14
 > **Objetivo:** Portar el juego de referencia `references/02-asteroids/game.js` a un componente React aislado y jugable con teclado en `/juegos/asteroids/jugar`, reemplazando la maqueta de puntaje falso del catálogo por una versión real con vidas, niveles y guardado de puntuación.

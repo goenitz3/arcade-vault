@@ -1,6 +1,6 @@
 # SPEC 02 — Landing page y reubicación de la Biblioteca
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** 01-mvp-pantallas-visuales
 > **Fecha:** 2026-08-04
 > **Objetivo:** Portar la landing page de `references/templates/home-about/home.jsx` a `/`, moviendo la Biblioteca actual a `/games` y actualizando el Nav para reflejar la nueva estructura.

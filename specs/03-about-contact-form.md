@@ -1,6 +1,6 @@
 # SPEC 03 — About page y formulario de contacto con Resend
 
-> **Estado:** Aprovado
+> **Estado:** Implementado
 > **Depende de:** 02-landing-page
 > **Fecha:** 2026-08-05
 > **Objetivo:** Portar la página "Acerca de" de `references/templates/home-about/about.jsx` a `/about`, conectando su formulario de contacto a un envío real de correo vía Resend a través de una API route.
